@@ -61,12 +61,118 @@
 
     <li class="apidocModuleLi"><a href="#apidoc.module.mongoose-unique-validator">module mongoose-unique-validator</a><ol>
 
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.mongoose-unique-validator.mongoose-unique-validator">
+            function <span class="apidocSignatureSpan"></span>mongoose-unique-validator
+            <span class="apidocSignatureSpan">(schema, options)</span>
+            </a>
+
+        </li>
+
     </ol></li>
 
 </ol></div>
 
 <div class="apidocSectionDiv">
 <h1><a href="#apidoc.module.mongoose-unique-validator" id="apidoc.module.mongoose-unique-validator">module mongoose-unique-validator</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.mongoose-unique-validator.mongoose-unique-validator" id="apidoc.element.mongoose-unique-validator.mongoose-unique-validator">
+        function <span class="apidocSignatureSpan"></span>mongoose-unique-validator
+        <span class="apidocSignatureSpan">(schema, options)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">mongoose-unique-validator = function (schema, options) {
+    options = options || {};
+    var type = options.type || &#x27;unique&#x27;;
+    var message = options.message || &#x27;Error, expected `{PATH}` to be unique. Value: `{VALUE}`&#x27;;
+
+    // Dynamically iterate all indexes
+    schema.indexes().forEach(function(index) {
+        var indexOptions = index[1];
+
+        if (indexOptions.unique) {
+            var paths = Object.keys(index[0]);
+            paths.forEach(function(pathName) {
+                // Choose error message
+                var pathMessage = message;
+                if (typeof indexOptions.unique === &#x27;string&#x27;) {
+                    pathMessage = indexOptions.unique;
+                }
+
+                // Obtain the correct path object
+                var path = deepPath(schema, pathName);
+
+                // Nested objects without schemas may be accessible this way
+                if (!path) {
+                    path = schema.path(pathName);
+                }
+
+                if (path) {
+                    // Add an async validator
+                    path.validate(function() {
+                        var doc = this;
+
+                        return new Promise(function(resolve) {
+                            var isSubdocument = typeof doc.ownerDocument === &#x27;function&#x27;;
+                            var isQuery = doc.constructor.name === &#x27;Query&#x27;;
+                            var parentDoc = isSubdocument ? doc.ownerDocument() : doc;
+                            var isNew = typeof parentDoc.isNew === &#x27;boolean&#x27; ? parentDoc.isNew : !isQuery;
+
+                            var conditions = [];
+                            paths.forEach(function(name) {
+                                var pathValue;
+
+                                // If the doc is a query, this is a findAndUpdate
+                                if (isQuery) {
+                                    pathValue = get(doc, &#x27;_update.&#x27; + name) || get(doc, &#x27;_update.$set.&#x27; + name);
+                                } else {
+                                    pathValue = get(doc, isSubdocument ? name.split(&#x27;.&#x27;).pop() : name);
+                                }
+
+                                // Wrap with case-insensitivity
+                                if (path.options &#x26;&#x26; path.options.uniqueCaseInsensitive) {
+                                    pathValue = new RegExp(&#x27;^&#x27; + pathValue + &#x27;$&#x27;, &#x27;i&#x27;);
+                                }
+
+                                var condition = {};
+                                condition[name] = pathValue;
+
+                                conditions.push(condition);
+                            });
+
+                            if (!isNew) {
+                                // Use conditions the user has with find*AndUpdate
+                                if (isQuery) {
+                                    each(doc._conditions, function(value, key) {
+                                        var cond = {};
+                                        cond[key] = { $ne: value };
+                                        conditions.push(cond);
+                                    });
+                                } else if (doc._id) {
+                                    conditions.push({ _id: { $ne: doc._id } });
+                                }
+                            }
+
+                            // Obtain the model depending on context
+                            // https://github.com/Automattic/mongoose/issues/3430
+                            // https://github.com/Automattic/mongoose/issues/3589
+                            var model;
+                            if (doc.constructor.name === &#x27;Query&#x27;) {
+                                model = doc.model;
+                            } else if (isSubdocument) {
+                                model = doc.ownerDocument().model(doc.ownerDocument().constructor.modelName);
+                            } else if (typeof doc.model === &#x27;function&#x27;) {
+                                model = doc.model(doc.constructor.modelName);
+                            }
+
+                            model.where({ $and: conditions }).count(function(err, ...</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
 
 </div>
 

@@ -1,4 +1,4 @@
-<div class="apidocDiv">
+<html><head></head><body><div class="apidocDiv">
 <style>
 /*csslint
 */
@@ -47,17 +47,10 @@
 }
 </style>
 <h1>api documentation for
-    <a
-
-        href="https://github.com/blakehaswell/mongoose-unique-validator#readme"
-
-    >mongoose-unique-validator (v1.0.5)</a>
+    <a href="https://github.com/blakehaswell/mongoose-unique-validator#readme">mongoose-unique-validator (v1.0.5)</a>
 </h1>
 <h4>mongoose-unique-validator is a plugin which adds pre-save validation for unique fields within a Mongoose schema.</h4>
-<div class="apidocSectionDiv"><a
-    href="#apidoc.tableOfContents"
-    id="apidoc.tableOfContents"
-><h1>table of contents</h1></a><ol>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
 
     <li class="apidocModuleLi"><a href="#apidoc.module.mongoose-unique-validator">module mongoose-unique-validator</a><ol>
 
@@ -87,8 +80,8 @@
     <ul>
     <li>description and source-code<pre class="apidocCodePre">mongoose-unique-validator = function (schema, options) {
     options = options || {};
-    var type = options.type || &#x27;unique&#x27;;
-    var message = options.message || &#x27;Error, expected `{PATH}` to be unique. Value: `{VALUE}`&#x27;;
+    var type = options.type || 'unique';
+    var message = options.message || 'Error, expected `{PATH}` to be unique. Value: `{VALUE}`';
 
     // Dynamically iterate all indexes
     schema.indexes().forEach(function(index) {
@@ -99,7 +92,7 @@
             paths.forEach(function(pathName) {
                 // Choose error message
                 var pathMessage = message;
-                if (typeof indexOptions.unique === &#x27;string&#x27;) {
+                if (typeof indexOptions.unique === 'string') {
                     pathMessage = indexOptions.unique;
                 }
 
@@ -117,10 +110,10 @@
                         var doc = this;
 
                         return new Promise(function(resolve) {
-                            var isSubdocument = typeof doc.ownerDocument === &#x27;function&#x27;;
-                            var isQuery = doc.constructor.name === &#x27;Query&#x27;;
+                            var isSubdocument = typeof doc.ownerDocument === 'function';
+                            var isQuery = doc.constructor.name === 'Query';
                             var parentDoc = isSubdocument ? doc.ownerDocument() : doc;
-                            var isNew = typeof parentDoc.isNew === &#x27;boolean&#x27; ? parentDoc.isNew : !isQuery;
+                            var isNew = typeof parentDoc.isNew === 'boolean' ? parentDoc.isNew : !isQuery;
 
                             var conditions = [];
                             paths.forEach(function(name) {
@@ -128,14 +121,14 @@
 
                                 // If the doc is a query, this is a findAndUpdate
                                 if (isQuery) {
-                                    pathValue = get(doc, &#x27;_update.&#x27; + name) || get(doc, &#x27;_update.$set.&#x27; + name);
+                                    pathValue = get(doc, '_update.' + name) || get(doc, '_update.$set.' + name);
                                 } else {
-                                    pathValue = get(doc, isSubdocument ? name.split(&#x27;.&#x27;).pop() : name);
+                                    pathValue = get(doc, isSubdocument ? name.split('.').pop() : name);
                                 }
 
                                 // Wrap with case-insensitivity
-                                if (path.options &#x26;&#x26; path.options.uniqueCaseInsensitive) {
-                                    pathValue = new RegExp(&#x27;^&#x27; + pathValue + &#x27;$&#x27;, &#x27;i&#x27;);
+                                if (path.options &amp;&amp; path.options.uniqueCaseInsensitive) {
+                                    pathValue = new RegExp('^' + pathValue + '$', 'i');
                                 }
 
                                 var condition = {};
@@ -161,11 +154,11 @@
                             // https://github.com/Automattic/mongoose/issues/3430
                             // https://github.com/Automattic/mongoose/issues/3589
                             var model;
-                            if (doc.constructor.name === &#x27;Query&#x27;) {
+                            if (doc.constructor.name === 'Query') {
                                 model = doc.model;
                             } else if (isSubdocument) {
                                 model = doc.ownerDocument().model(doc.ownerDocument().constructor.modelName);
-                            } else if (typeof doc.model === &#x27;function&#x27;) {
+                            } else if (typeof doc.model === 'function') {
                                 model = doc.model(doc.constructor.modelName);
                             }
 
@@ -182,3 +175,4 @@
     ]
 </div>
 </div>
+</body></html>
